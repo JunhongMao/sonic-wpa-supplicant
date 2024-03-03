@@ -20,7 +20,7 @@
 
 #ifndef CRYPTO_H
 #define CRYPTO_H
-
+#include <openssl/evp.h>
 /**
  * md4_vector - MD4 hash for data vector
  * @num_elem: Number of elements in the data vector
@@ -930,4 +930,11 @@ int crypto_ec_key_verify_signature(struct crypto_ec_key *key, const u8 *data,
 				   size_t len, const u8 *sig, size_t sig_len);
 int crypto_ec_key_group(struct crypto_ec_key *key);
 
+/**
+ * crypto_ec_key_cmp - Compare two EC public keys
+ * @key1: Key 1
+ * @key2: Key 2
+ * Returns: 0 if public keys are identical, -1 otherwise
+ */
+int crypto_ec_key_cmp(EVP_PKEY *key1, EVP_PKEY *key2);
 #endif /* CRYPTO_H */

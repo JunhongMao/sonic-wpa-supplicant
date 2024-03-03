@@ -2392,7 +2392,7 @@ skip_groups:
 		goto fail;
 	dpp_debug_print_key("DPP: Received netAccessKey", key);
 
-	if (EVP_PKEY_cmp(key, auth->own_protocol_key) != 1) {
+	if (crypto_ec_key_cmp(key, auth->own_protocol_key)) {
 		wpa_printf(MSG_DEBUG,
 			   "DPP: netAccessKey in connector does not match own protocol key");
 #ifdef CONFIG_TESTING_OPTIONS
