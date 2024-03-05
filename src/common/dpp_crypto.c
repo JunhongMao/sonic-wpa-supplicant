@@ -176,15 +176,14 @@ fail:
 }
 
 
-void dpp_debug_print_key(const char *title, EVP_PKEY *key)
+void dpp_debug_print_key(const char *title, struct crypto_ec_key *key)
 {
 	EC_KEY *eckey;
 	BIO *out;
 	size_t rlen;
 	char *txt;
 	int res;
-	unsigned char *der = NULL;
-	int der_len;
+	struct wpabuf *der = NULL;
 	const EC_GROUP *group;
 	const EC_POINT *point;
 
@@ -192,7 +191,7 @@ void dpp_debug_print_key(const char *title, EVP_PKEY *key)
 	if (!out)
 		return;
 
-	EVP_PKEY_print_private(out, key, 0, NULL);
+	EVP_PKEY_print_private(out, (EVP_PKEY *) key, 0, NULL);
 	rlen = BIO_ctrl_pending(out);
 	txt = os_malloc(rlen + 1);
 	if (txt) {
@@ -205,7 +204,7 @@ void dpp_debug_print_key(const char *title, EVP_PKEY *key)
 	}
 	BIO_free(out);
 
-	eckey = EVP_PKEY_get1_EC_KEY(key);
+	eckey = EVP_PKEY_get1_EC_KEY((EVP_PKEY *) key);
 	if (!eckey)
 		return;
 
@@ -214,19 +213,17 @@ void dpp_debug_print_key(const char *title, EVP_PKEY *key)
 	if (group && point)
 		dpp_debug_print_point(title, group, point);
 
-	der_len = i2d_ECPrivateKey(eckey, &der);
-	if (der_len > 0)
-		wpa_hexdump_key(MSG_DEBUG, "DPP: ECPrivateKey", der, der_len);
-	OPENSSL_free(der);
-	if (der_len <= 0) {
-		der = NULL;
-		der_len = i2d_EC_PUBKEY(eckey, &der);
-		if (der_len > 0)
-			wpa_hexdump(MSG_DEBUG, "DPP: EC_PUBKEY", der, der_len);
-		OPENSSL_free(der);
+	der = crypto_ec_key_get_ecprivate_key(key, true);
+	if (der) {
+		wpa_hexdump_buf_key(MSG_DEBUG, "DPP: ECPrivateKey", der);
+	} else {
+		der = crypto_ec_key_get_subject_public_key(key);
+		if (der)
+			wpa_hexdump_buf_key(MSG_DEBUG, "DPP: EC_PUBKEY", der);
 	}
 
 	EC_KEY_free(eckey);
+	wpabuf_clear_free(der);
 }
 
 

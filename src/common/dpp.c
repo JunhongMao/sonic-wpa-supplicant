@@ -2446,10 +2446,8 @@ static void dpp_copy_ppkey(struct dpp_config_obj *conf, EVP_PKEY *ppkey)
 static void dpp_copy_netaccesskey(struct dpp_authentication *auth,
 				  struct dpp_config_obj *conf)
 {
-	unsigned char *der = NULL;
-	int der_len;
-	EC_KEY *eckey;
-	EVP_PKEY *own_key;
+	struct wpabuf *net_access_key;
+	struct crypto_ec_key *own_key;
 
 	own_key = auth->own_protocol_key;
 #ifdef CONFIG_DPP2
@@ -2457,19 +2455,13 @@ static void dpp_copy_netaccesskey(struct dpp_authentication *auth,
 	    auth->reconfig_old_protocol_key)
 		own_key = auth->reconfig_old_protocol_key;
 #endif /* CONFIG_DPP2 */
-	eckey = EVP_PKEY_get1_EC_KEY(own_key);
-	if (!eckey)
+
+	net_access_key = crypto_ec_key_get_ecprivate_key(own_key, true);
+	if (!net_access_key)
 		return;
 
-	der_len = i2d_ECPrivateKey(eckey, &der);
-	if (der_len <= 0) {
-		EC_KEY_free(eckey);
-		return;
-	}
 	wpabuf_free(auth->net_access_key);
-	auth->net_access_key = wpabuf_alloc_copy(der, der_len);
-	OPENSSL_free(der);
-	EC_KEY_free(eckey);
+	auth->net_access_key = net_access_key;
 }
 
 
