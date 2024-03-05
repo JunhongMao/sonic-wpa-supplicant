@@ -24,8 +24,8 @@ void dpp_free_asymmetric_key(struct dpp_asymmetric_key *key)
 	while (key) {
 		struct dpp_asymmetric_key *next = key->next;
 
-		EVP_PKEY_free(key->csign);
-		EVP_PKEY_free(key->pp_key);
+		crypto_ec_key_deinit(key->csign);
+		crypto_ec_key_deinit(key->pp_key);
 		str_clear_free(key->config_template);
 		str_clear_free(key->connector_template);
 		os_free(key);
@@ -960,8 +960,9 @@ dpp_parse_one_asymmetric_key(const u8 *buf, size_t len)
 			   ERR_error_string(ERR_get_error(), NULL));
 		goto fail;
 	}
-	key->csign = EVP_PKEY_new();
-	if (!key->csign || EVP_PKEY_assign_EC_KEY(key->csign, eckey) != 1) {
+	key->csign = (struct crypto_ec_key *) EVP_PKEY_new();
+	if (!key->csign ||
+	    EVP_PKEY_assign_EC_KEY((EVP_PKEY *) key->csign, eckey) != 1) {
 		EC_KEY_free(eckey);
 		goto fail;
 	}
@@ -1092,8 +1093,9 @@ dpp_parse_one_asymmetric_key(const u8 *buf, size_t len)
 			   ERR_error_string(ERR_get_error(), NULL));
 		goto fail;
 	}
-	key->pp_key = EVP_PKEY_new();
-	if (!key->pp_key || EVP_PKEY_assign_EC_KEY(key->pp_key, eckey) != 1) {
+	key->pp_key = (struct crypto_ec_key *) EVP_PKEY_new();
+	if (!key->pp_key ||
+	    EVP_PKEY_assign_EC_KEY((EVP_PKEY *) key->pp_key, eckey) != 1) {
 		EC_KEY_free(eckey);
 		goto fail;
 	}
