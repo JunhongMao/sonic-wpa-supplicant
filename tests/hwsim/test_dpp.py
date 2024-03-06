@@ -2453,7 +2453,7 @@ def test_dpp_pkex_commit_reveal_req_processing_failure(dev, apdev):
     dev[0].dpp_pkex_resp(2437, identifier="test", code="secret")
 
     with alloc_fail(dev[0], 1,
-                    "dpp_get_pubkey_point;dpp_pkex_rx_commit_reveal_req"):
+                    "crypto_ec_key_get_pubkey_point;dpp_pkex_rx_commit_reveal_req"):
         dev[1].dpp_pkex_init(identifier="test", code="secret")
         wait_fail_trigger(dev[0], "GET_ALLOC_FAIL")
 
@@ -3673,9 +3673,9 @@ def test_dpp_pkex_alloc_fail(dev, apdev):
              (3, "dpp_pkex_init"),
              (1, "dpp_pkex_derive_z"),
              (1, "=dpp_pkex_rx_commit_reveal_resp"),
-             (1, "dpp_get_pubkey_point;dpp_build_jwk"),
-             (2, "dpp_get_pubkey_point;dpp_build_jwk"),
-             (1, "dpp_get_pubkey_point;dpp_auth_init")]
+             (1, "crypto_ec_key_get_pubkey_point;dpp_build_jwk"),
+             (2, "crypto_ec_key_get_pubkey_point;dpp_build_jwk"),
+             (1, "crypto_ec_key_get_pubkey_point;dpp_auth_init")]
     for count, func in tests:
         dev[0].request("DPP_STOP_LISTEN")
         dev[1].request("DPP_STOP_LISTEN")
@@ -3696,11 +3696,11 @@ def test_dpp_pkex_alloc_fail(dev, apdev):
                 dev[0].wait_event(["GAS-QUERY-DONE"], timeout=3)
 
     # Local error cases on the Responder
-    tests = [(1, "dpp_get_pubkey_point"),
+    tests = [(1, "crypto_ec_key_get_pubkey_point"),
              (1, "dpp_alloc_msg;dpp_pkex_build_exchange_resp"),
              (1, "dpp_alloc_msg;dpp_pkex_build_commit_reveal_resp"),
              (1, "dpp_alloc_msg;dpp_auth_build_resp"),
-             (1, "dpp_get_pubkey_point;dpp_auth_build_resp_ok"),
+             (1, "crypto_ec_key_get_pubkey_point;dpp_auth_build_resp_ok"),
              (1, "dpp_alloc_auth"),
              (1, "=dpp_auth_req_rx"),
              (1, "=dpp_auth_conf_rx"),
@@ -3711,7 +3711,7 @@ def test_dpp_pkex_alloc_fail(dev, apdev):
              (1, "json_parse;dpp_parse_connector"),
              (1, "dpp_parse_jwk;dpp_parse_connector"),
              (1, "dpp_parse_jwk;dpp_parse_cred_dpp"),
-             (1, "dpp_get_pubkey_point;dpp_check_pubkey_match"),
+             (1, "crypto_ec_key_get_pubkey_point;dpp_check_pubkey_match"),
              (1, "base64_gen_decode;dpp_process_signed_connector"),
              (1, "dpp_parse_jws_prot_hdr;dpp_process_signed_connector"),
              (2, "base64_gen_decode;dpp_process_signed_connector"),
@@ -3724,7 +3724,7 @@ def test_dpp_pkex_alloc_fail(dev, apdev):
              (2, "=dpp_pkex_rx_exchange_req"),
              (3, "=dpp_pkex_rx_exchange_req"),
              (1, "=dpp_pkex_rx_commit_reveal_req"),
-             (1, "dpp_get_pubkey_point;dpp_pkex_rx_commit_reveal_req"),
+             (1, "crypto_ec_key_get_pubkey_point;dpp_pkex_rx_commit_reveal_req"),
              (1, "dpp_bootstrap_key_hash")]
     for count, func in tests:
         dev[0].request("DPP_STOP_LISTEN")
@@ -4155,7 +4155,8 @@ def test_dpp_invalid_configurator_key(dev, apdev):
         if "FAIL" not in dev[0].request("DPP_CONFIGURATOR_ADD key=" + dpp_key_p256):
             raise Exception("Error not reported")
 
-    with alloc_fail(dev[0], 1, "dpp_get_pubkey_point;dpp_keygen_configurator"):
+    with alloc_fail(dev[0], 1,
+                    "crypto_ec_key_get_pubkey_point;dpp_keygen_configurator"):
         if "FAIL" not in dev[0].request("DPP_CONFIGURATOR_ADD key=" + dpp_key_p256):
             raise Exception("Error not reported")
 
