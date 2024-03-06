@@ -20,7 +20,7 @@
 
 #ifndef CRYPTO_H
 #define CRYPTO_H
-#include <openssl/evp.h>
+
 /**
  * md4_vector - MD4 hash for data vector
  * @num_elem: Number of elements in the data vector
@@ -938,7 +938,7 @@ void crypto_ec_point_debug_print(const struct crypto_ec *e,
 				 const char *title);
 
 /**
- * struct crypto_ecdh - Elliptic curve Diffie–Hellman context
+ * struct crypto_ecdh - Elliptic curve Diffieâ€“Hellman context
  *
  * Internal data structure for ECDH. The contents is specific to the used
  * crypto library.
@@ -946,7 +946,7 @@ void crypto_ec_point_debug_print(const struct crypto_ec *e,
 struct crypto_ecdh;
 
 /**
- * crypto_ecdh_init - Initialize elliptic curve Diffie–Hellman context
+ * crypto_ecdh_init - Initialize elliptic curve Diffieâ€“Hellman context
  * @group: Identifying number for the ECC group (IANA "Group Description"
  *	attribute registry for RFC 2409)
  * Returns: Pointer to ECDH context or %NULL on failure
@@ -1156,5 +1156,6 @@ int crypto_ec_key_group(struct crypto_ec_key *key);
  * @key2: Key 2
  * Returns: 0 if public keys are identical, -1 otherwise
  */
-int crypto_ec_key_cmp(EVP_PKEY *key1, EVP_PKEY *key2);
+int crypto_ec_key_cmp(struct crypto_ec_key *key1, struct crypto_ec_key *key2);
+
 #endif /* CRYPTO_H */

@@ -2759,15 +2759,10 @@ int crypto_ec_key_group(struct crypto_ec_key *key)
 }
 
 
-int crypto_ec_key_cmp(EVP_PKEY *key1, EVP_PKEY *key2)
+int crypto_ec_key_cmp(struct crypto_ec_key *key1, struct crypto_ec_key *key2)
 {
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-	if (EVP_PKEY_eq(key1, key2) != 1)
+	if (EVP_PKEY_cmp((EVP_PKEY *) key1, (EVP_PKEY *) key2) != 1)
 		return -1;
-#else
-	if (EVP_PKEY_cmp(key1, key2) != 1)
-		return -1;
-#endif
 	return 0;
 }
 
