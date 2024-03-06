@@ -81,13 +81,14 @@ static void EVP_MD_CTX_free(EVP_MD_CTX *ctx)
 }
 
 
+#ifdef CONFIG_ECC
 static EC_KEY * EVP_PKEY_get0_EC_KEY(EVP_PKEY *pkey)
 {
 	if (pkey->type != EVP_PKEY_EC)
 		return NULL;
 	return pkey->pkey.ec;
 }
-
+#endif /* CONFIG_ECC */
 
 static int ECDSA_SIG_set0(ECDSA_SIG *sig, BIGNUM *r, BIGNUM *s)
 {
