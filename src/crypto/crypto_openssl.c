@@ -23,6 +23,9 @@
 #include <openssl/ec.h>
 #include <openssl/x509.h>
 #endif /* CONFIG_ECC */
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#include <openssl/provider.h>
+#endif /* OpenSSL version >= 3.0 */
 
 #include "common.h"
 #include "utils/const_time.h"
@@ -109,6 +112,24 @@ static void ECDSA_SIG_get0(const ECDSA_SIG *sig, const BIGNUM **pr,
 
 
 #endif /* OpenSSL version < 1.1.0 */
+void openssl_load_legacy_provider(void)
+{
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	static bool loaded = false;
+	OSSL_PROVIDER *legacy;
+
+	if (loaded)
+		return;
+
+	legacy = OSSL_PROVIDER_load(NULL, "legacy");
+
+	if (legacy) {
+		OSSL_PROVIDER_load(NULL, "default");
+		loaded = true;
+	}
+#endif /* OpenSSL version >= 3.0 */
+}
+
 
 static BIGNUM * get_group5_prime(void)
 {
@@ -216,6 +237,7 @@ static int openssl_digest_vector(const EVP_MD *type, size_t num_elem,
 #ifndef CONFIG_FIPS
 int md4_vector(size_t num_elem, const u8 *addr[], const size_t *len, u8 *mac)
 {
+	openssl_load_legacy_provider();
 	return openssl_digest_vector(EVP_md4(), num_elem, addr, len, mac);
 }
 #endif /* CONFIG_FIPS */
@@ -226,6 +248,8 @@ int des_encrypt(const u8 *clear, const u8 *key, u8 *cypher)
 	u8 pkey[8], next, tmp;
 	int i, plen, ret = -1;
 	EVP_CIPHER_CTX *ctx;
+
+	openssl_load_legacy_provider();
 
 	/* Add parity bits to the key */
 	next = 0;
@@ -263,6 +287,8 @@ int rc4_skip(const u8 *key, size_t keylen, size_t skip,
 	int outl;
 	int res = -1;
 	unsigned char skip_buf[16];
+
+	openssl_load_legacy_provider();
 
 	ctx = EVP_CIPHER_CTX_new();
 	if (!ctx ||
